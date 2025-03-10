@@ -1,0 +1,57 @@
+/* Navbar Styling */
+.navbar {
+    background-color:#333; /* Dark Blue */
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  /* Logo Section */
+  .navbar-logo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    width: 50px;
+    height: auto;
+    margin-right: 10px;
+  }
+  
+  .navbar-logo h2 {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  /* Navigation Links */
+  .navbar-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+  }
+  
+  .navbar-links li {
+    display: inline;
+  }
+  
+  .navbar-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.3s ease-in-out;
+  }
+  
+  /* Hover Effect */
+  .navbar-links a:hover {
+    color: #ffcc00; /* Yellow */
+  }
+  
+  /* Active Link */
+  .active {
+    color: #ffcc00;
+    font-weight: bold;
+  }
+  
