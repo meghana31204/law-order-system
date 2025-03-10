@@ -4,6 +4,7 @@ const ReportCrime = () => {
     const [formData, setFormData] = useState({
         name: "",
         crimeType: "",
+        otherCrimeType: "",
         location: "",
         description: ""
     });
@@ -16,10 +17,27 @@ const ReportCrime = () => {
         let newErrors = {};
         if (!formData.name.trim()) newErrors.name = "Name is required";
         if (!formData.crimeType.trim()) newErrors.crimeType = "Crime type is required";
+        if (formData.crimeType === "Other" && !formData.otherCrimeType.trim()) newErrors.otherCrimeType = "Specify crime type";
         if (!formData.location.trim()) newErrors.location = "Location is required";
         if (formData.description.trim().length < 10) newErrors.description = "Description must be at least 10 characters";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleAddLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setFormData({ ...formData, location: `${latitude}, ${longitude}` });
+                },
+                () => {
+                    alert("Error fetching location. Please enable location services.");
+                }
+            );
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
     };
 
     const handleSubmit = (e) => {
@@ -30,7 +48,7 @@ const ReportCrime = () => {
 
             setTimeout(() => {
                 setSuccessMessage("Crime reported successfully!");
-                setFormData({ name: "", crimeType: "", location: "", description: "" });
+                setFormData({ name: "", crimeType: "", otherCrimeType: "", location: "", description: "" });
                 setErrors({});
                 setLoading(false);
                 setTimeout(() => setSuccessMessage(""), 3000);
@@ -40,7 +58,7 @@ const ReportCrime = () => {
 
     return (
         <div>
-            {/* Updated Navbar */}
+            {/* Navbar */}
             <nav style={styles.navbar}>
                 <div style={styles.navbarLogo}>
                     <img
@@ -65,16 +83,23 @@ const ReportCrime = () => {
                 <form onSubmit={handleSubmit} style={styles.form}>
                     <div style={styles.formGroup}>
                         <label style={styles.label}>Your Name</label>
-                        <input type="text" style={styles.input} value={formData.name} 
+                        <input 
+                            type="text" 
+                            style={styles.input} 
+                            value={formData.name} 
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                            placeholder="Enter your name" />
+                            placeholder="Enter your name" 
+                        />
                         {errors.name && <p style={styles.errorText}>{errors.name}</p>}
                     </div>
 
                     <div style={styles.formGroup}>
                         <label style={styles.label}>Crime Type</label>
-                        <select style={styles.input} value={formData.crimeType} 
-                            onChange={(e) => setFormData({ ...formData, crimeType: e.target.value })}>
+                        <select 
+                            style={styles.input} 
+                            value={formData.crimeType} 
+                            onChange={(e) => setFormData({ ...formData, crimeType: e.target.value, otherCrimeType: "" })}
+                        >
                             <option value="">Select crime type</option>
                             <option value="Theft">Theft</option>
                             <option value="Assault">Assault</option>
@@ -85,24 +110,57 @@ const ReportCrime = () => {
                         {errors.crimeType && <p style={styles.errorText}>{errors.crimeType}</p>}
                     </div>
 
+                    {/* Other Crime Type Input (Shows only if "Other" is selected) */}
+                    {formData.crimeType === "Other" && (
+                        <div style={styles.formGroup}>
+                            <label style={styles.label}>Specify Crime Type</label>
+                            <input 
+                                type="text" 
+                                style={styles.input} 
+                                value={formData.otherCrimeType} 
+                                onChange={(e) => setFormData({ ...formData, otherCrimeType: e.target.value })} 
+                                placeholder="Enter crime type"
+                            />
+                            {errors.otherCrimeType && <p style={styles.errorText}>{errors.otherCrimeType}</p>}
+                        </div>
+                    )}
+
                     <div style={styles.formGroup}>
                         <label style={styles.label}>Location</label>
-                        <input type="text" style={styles.input} value={formData.location} 
+                        <input 
+                            type="text" 
+                            style={styles.input} 
+                            value={formData.location} 
                             onChange={(e) => setFormData({ ...formData, location: e.target.value })} 
-                            placeholder="Enter location" />
+                            placeholder="Enter location or use 'Add Location'"
+                            readOnly
+                        />
+                        <button 
+                            type="button" 
+                            style={styles.addLocationButton} 
+                            onClick={handleAddLocation}
+                        >
+                            Add Location
+                        </button>
                         {errors.location && <p style={styles.errorText}>{errors.location}</p>}
                     </div>
 
                     <div style={styles.formGroup}>
                         <label style={styles.label}>Description</label>
-                        <textarea style={{ ...styles.input, height: "80px", resize: "none" }} 
+                        <textarea 
+                            style={{ ...styles.input, height: "80px", resize: "none" }} 
                             value={formData.description} 
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
-                            placeholder="Describe the incident"></textarea>
+                            placeholder="Describe the incident"
+                        ></textarea>
                         {errors.description && <p style={styles.errorText}>{errors.description}</p>}
                     </div>
 
-                    <button type="submit" style={loading ? styles.buttonDisabled : styles.button} disabled={loading}>
+                    <button 
+                        type="submit" 
+                        style={loading ? styles.buttonDisabled : styles.button} 
+                        disabled={loading}
+                    >
                         {loading ? "Submitting..." : "Submit Report"}
                     </button>
                 </form>
@@ -154,7 +212,7 @@ const styles = {
         borderRadius: "8px",
         backgroundColor: "#f9f9f9"
     },
-    form: {  // Added missing comma
+    form: {
         display: "flex",
         flexDirection: "column",
         gap: "10px"
@@ -168,6 +226,14 @@ const styles = {
         padding: "10px",
         borderRadius: "5px",
         border: "1px solid #ccc"
+    },
+    addLocationButton: {
+        backgroundColor: "#007BFF",
+        color: "white",
+        padding: "10px",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer"
     },
     button: {
         backgroundColor: "#4CAF50",
